@@ -1,6 +1,6 @@
 <h1>Signatures and Logs - Exploring Suricata</h1>
 
- ### [YouTube Demonstration](https://youtu.be/7eJexJVCqJo)
+
 
 <h2>Description</h2>
 <p>The Suricata tool monitors network interfaces and applies rules to the packets that pass through the interface. Suricata determines whether each packet should generate an alert and be dropped, rejected, or allowed to pass through the interface.</p>
@@ -77,8 +77,8 @@ To summarize, this signature triggers an alert whenever Suricata observes the te
 <img src="https://i.imgur.com/hbOrYBE.png" height="80%" width="80%""/>
 <br />
 <br />
-Observe the wiped disk:  <br/>
-<img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%"/>
+<p>Use the jq command to display all event logs related to a specific flow_id from the eve.json file. The flow_id value is a 16-digit number and will vary for each of the log entries. Replace X with any of the flow_id values returned by the previous query:</p>  <br/>
+<img src="https://i.imgur.com/WOg7pVa.png" height="80%" width="80%"/>
 </p>
 
 <!--
