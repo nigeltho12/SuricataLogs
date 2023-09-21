@@ -3,48 +3,82 @@
  ### [YouTube Demonstration](https://youtu.be/7eJexJVCqJo)
 
 <h2>Description</h2>
-Project consists of a simple PowerShell script that walks the user through "zeroing out" (wiping) any drives that are connected to the system. The utility allows you to select the target disk and choose the number of passes that are performed. The PowerShell script will configure a diskpart script file based on the user's selections and then launch Diskpart to perform the disk sanitization.
+<p>The Suricata tool monitors network interfaces and applies rules to the packets that pass through the interface. Suricata determines whether each packet should generate an alert and be dropped, rejected, or allowed to pass through the interface.</p>
+
+Source and destination networks must be specified in the Suricata configuration. Custom rules can be written to specify which traffic should be processed.
 <br />
 
 
-<h2>Languages and Utilities Used</h2>
+<h2>Objective</h2>
 
-- <b>PowerShell</b> 
-- <b>Diskpart</b>
+- <b>Examine a rule and practice using Suricata to trigger alerts on network traffic. </b> 
+- <b>Analyze log outputs, such as a fast.log and eve.json file.</b>
 
-<h2>Environments Used </h2>
+<h2>Suricata Signature Guide </h2>
+<img src="https://i.imgur.com/enPZE1o.png" height="80%" width="80%" />
 
-- <b>Windows 10</b> (21H2)
+
 
 <h2>Program walk-through:</h2>
 
 <p align="center">
-Launch the utility: <br/>
-<img src="https://i.imgur.com/62TgaWL.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<p>The /home/analyst directory contains a custom.rules file that defines the network traffic rules, which Suricata captures:</p> <br/>
+<img src="https://i.imgur.com/aMkmOZv.png" height="80%" width="80%" />
 <br />
 <br />
-Select the disk:  <br/>
-<img src="https://i.imgur.com/tcTyMUE.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+The action is the first part of the signature. It determines the action to take if all conditions are met.
+
+Actions differ across network intrusion detection system (NIDS) rule languages, but some common actions are alert, drop, pass, and reject.
+
+<p>Using our example, the file contains a single alert as the action. The alert keyword instructs to alert on selected network traffic. The IDS will inspect the traffic packets and send out an alert in case it matches:</p>  <br/>
+<img src="https://i.imgur.com/tCPvBjF.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
 <br />
 <br />
-Enter the number of passes: <br/>
-<img src="https://i.imgur.com/nCIbXbg.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+The next part of the signature is the header. The header defines the signature’s network traffic, which includes attributes such as protocols, source and destination IP addresses, source and destination ports, and traffic direction.
+
+<p>The next field after the action keyword is the protocol field. In our example, the protocol is http, which determines that the rule applies only to HTTP traffic.
+
+The parameters to the protocol http field are $HOME_NET any -> $EXTERNAL_NET any. The arrow indicates the direction of the traffic coming from the $HOME_NET and going to the destination IP address $EXTERNAL_NET.
+
+$HOME_NET is a Suricata variable defined in /etc/suricata/suricata.yaml that you can use in your rule definitions as a placeholder for your local or home network to identify traffic that connects to or from systems within your organization:</p> <br/>
+<img src="https://i.imgur.com/rzTGKFA.png" height="80%" width="80%"/>
 <br />
 <br />
-Confirm your selection:  <br/>
-<img src="https://i.imgur.com/cdFHBiU.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<p>The many available rule options allow you to customize signatures with additional parameters. Configuring rule options helps narrow down network traffic so you can find exactly what you’re looking for. As in our example, rule options are typically enclosed in a pair of parentheses and separated by semicolons.
+
+Let's further examine the rule options in our example:
+
+The msg: option provides the alert text. In this case, the alert will print out the text “GET on wire”, which specifies why the alert was triggered.
+The flow:established,to_server option determines that packets from the client to the server should be matched. (In this instance, a server is defined as the device responding to the initial SYN packet with a SYN-ACK packet.)
+The content:"GET" option tells Suricata to look for the word GET in the content of the http.method portion of the packet.
+The sid:12345 (signature ID) option is a unique numerical value that identifies the rule.
+The rev:3 option indicates the signature's revision which is used to identify the signature's version. Here, the revision version is 3.
+To summarize, this signature triggers an alert whenever Suricata observes the text GET as the HTTP method in an HTTP packet from the home network going to the external network.:</p>  <br/>
+<img src="https://i.imgur.com/j0xniFd.png" height="80%" width="80%"/>
 <br />
 <br />
-Wait for process to complete (may take some time):  <br/>
-<img src="https://i.imgur.com/JL945Ga.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<p>List the files in the /var/log/suricata folder:</p>  <br/>
+<img src="https://i.imgur.com/E7xhwbi.png" height="80%" width="80%"/>
 <br />
 <br />
-Sanitization complete:  <br/>
-<img src="https://i.imgur.com/K71yaM2.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<p>Run suricata using the custom.rules and sample.pcap files:</p>  <br/>
+<img src="https://i.imgur.com/9wr4fgh.png" height="80%" width="80%""/>
+<br />
+<br />
+<p>Use the cat command to display the fast.log file generated by Suricata:</p>  <br/>
+<img src="https://i.imgur.com/B7yc3Wl.png" height="80%" width="80%"/>
+</p>
+<p>Use the cat command to display the entries in the eve.json file:</p>  <br/>
+<img src="https://i.imgur.com/7vQbsAw.png" height="80%" width="80%"/>
+<br />
+<br />
+<p>1. Use the jq command to display the entries in an improved format</p> 
+<p> 2.Use the jq command to extract specific event data from the eve.json file:</p>  <br/>
+<img src="https://i.imgur.com/hbOrYBE.png" height="80%" width="80%""/>
 <br />
 <br />
 Observe the wiped disk:  <br/>
-<img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%" alt="Disk Sanitization Steps"/>
+<img src="https://i.imgur.com/AeZkvFQ.png" height="80%" width="80%"/>
 </p>
 
 <!--
